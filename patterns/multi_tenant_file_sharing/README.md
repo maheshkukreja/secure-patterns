@@ -12,42 +12,37 @@ Secure multi-tenant file sharing requires a control plane: an application-owned 
 
 ```mermaid
 flowchart TD
-    %% Styling for clarity
+    %% Styling
     classDef untrusted fill:#ffebee,stroke:#c62828,stroke-width:2px,color:black;
-    classDef trusted fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:black;
+    classDef control fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:black;
     classDef storage fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:black;
 
-    %% --- External World ---
     Client([Client]):::untrusted
-    PublicUser([Public User]):::untrusted
 
-    %% --- Trusted Infrastructure ---
-    subgraph Trusted_Zone [Trusted Zone / VPC]
-        direction TB
-        API[API / AuthZ Layer]:::trusted
-        Registry[(Object Registry)]:::trusted
-        Links[(Share Link Store)]:::trusted
+    subgraph Control_Plane [Control Plane / API]
+        API[API Layer]:::control
+        Registry[(Registry DB)]:::control
     end
 
-    %% --- Data Plane ---
-    subgraph Data_Plane [Cloud Storage]
-        Private_Store[(Private Tenant Storage)]:::storage
+    subgraph Data_Plane [Data Plane / S3]
+        Storage[(Private Bucket)]:::storage
     end
 
-    %% --- The Flows ---
+    %% Standard Flow
+    Client -- "1. GET /files/{uuid}" --> API
+    API -- "2. AuthZ Lookup" --> Registry
+    Registry -- "Tenant/Policy" --> API
+    API -- "3. Issue Pre-signed URL" --> Client
+
+    %% Share Link Flow
+    Client -. "1. GET /share/{token}" .-> API
+    API -. "2. Validate Token" .-> Registry
     
-    %% Standard Access
-    Client -- "1. GET /file/{object_id}" --> API
-    API -- "2. Check AuthZ & Tenant" --> Registry
-    API -- "3. Issue Delivery Grant" --> Private_Store
-    Private_Store -. "4. Bytes" .-> Client
+    %% Download
+    Client -- "4. GET (Signed URL)" --> Storage
 
-    %% Shared Link Access
-    PublicUser -- "5. GET /share/{token}" --> API
-    API -- "6. Resolve & Verify Token" --> Links
-    Links -.-> Registry
-    API -- "7. Issue Short-lived Grant" --> Private_Store
-    Private_Store -. "8. Bytes" .-> PublicUser
+    %% Layout hints
+    Control_Plane ~~~ Data_Plane
 ```
 
 ## Security Artifacts
