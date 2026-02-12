@@ -1,4 +1,6 @@
-# Phase 1: Intake (Pre-signing & Uploads)
+# Threat Model
+
+## Phase 1: Intake (Pre-signing & Uploads)
 
 Focus: Preventing unauthorized writes and ensuring tenant isolation
 
@@ -11,7 +13,7 @@ Focus: Preventing unauthorized writes and ensuring tenant isolation
 | IAM role | Blast radius: Signing principal has s3:* or broad prefix access; bug becomes compromise | Scoped role | 1. Least privilege: Restrict signer role to specific putObject actions and prefixes<br>2. Env separation: Separate roles for dev / prod | Medium |
 | Pre-sign scope | Scope creep: Wildcards or broad prefixes allow overwriting unintended objects | Exact-key signing | 1. Block wildcards: Sign only specific full path uuid / file<br>2. Allowlist: Assert keys match specific patterns in code | Medium |
 
-# Phase 2: Processing (Storage & Workers)
+## Phase 2: Processing (Storage & Workers)
 
 Focus: Preventing malicious content from crashing the pipeline
 
@@ -23,7 +25,7 @@ Focus: Preventing malicious content from crashing the pipeline
 | Processing pipeline | Poison pill: Malformed file crashes parser / worker (RCE / DoS) | Standard containers | 1. Sandbox: Run workers in ephemeral sandboxes (Firecracker / gVisor)<br>2. Resource limits: Set strict timeouts and memory caps<br>3. Network: Restrict worker egress | Low |
 | Storage capacity | Zombie data: Abandoned uploads (never finalized) accumulate indefinitely, increasing costs | Manual cleanup | 1. Auto-expiry: Configure S3 lifecycle rule to delete objects in quarantine/ older than 24h<br>2. Cron: Prune DB sessions where status = 'pending' > 24h | Low |
 
-# Phase 3: Serving (Downloads)
+## Phase 3: Serving (Downloads)
 
 Focus: Preventing the file from attacking the user
 
