@@ -9,61 +9,67 @@ An architectural pattern for mediating all communication between client applicat
 An AI Agent Gateway sits between client applications and AI agents, mediating every request and response. The gateway enforces authorization, inspects payloads in both directions, and logs every interaction. Agents are workloads. The gateway is the control plane. Client apps are untrusted callers.
 
 ```mermaid
-flowchart LR
+flowchart TB
     %% ========= Styles =========
     classDef untrusted fill:#fdecea,stroke:#b71c1c,stroke-width:2px,color:#000;
     classDef control fill:#e3f2fd,stroke:#0d47a1,stroke-width:2px,color:#000;
     classDef workload fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000;
     classDef data fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px,color:#000;
 
-    %% ========= Untrusted Zone =========
+    %% ========= Untrusted Zone (Top) =========
     subgraph Untrusted["Untrusted: Client Applications"]
+        direction LR
         Slack[Slack Bot]:::untrusted
         Web[Web UI]:::untrusted
         CLI[Custom App / mTLS]:::untrusted
     end
 
-    %% ========= Trusted Control Plane =========
+    %% ========= Control Plane (Middle) =========
     subgraph Gateway["Trusted: Agent Gateway (Control Plane)"]
-        direction LR
-        AuthN[1. Authentication]:::control
-        AuthZ[2. Authorization Policy]:::control
-        InDLP[3. Inbound Inspection]:::control
-        Router[4. Agent Routing]:::control
-        OutDLP[6. Outbound Inspection]:::control
-        Egress[7. Deliver to Client]:::control
+        direction TB
+
+        subgraph Inbound["Inbound Flow"]
+            direction TB
+            AuthN[1. Authentication]:::control
+            AuthZ[2. Authorization Policy]:::control
+            InDLP[3. Inbound Inspection]:::control
+            Router[4. Agent Routing]:::control
+
+            AuthN -->|2| AuthZ -->|3| InDLP -->|4| Router
+        end
+
+        subgraph Outbound["Outbound Flow"]
+            direction TB
+            OutDLP[6. Outbound Inspection]:::control
+            Egress[7. Deliver to Client]:::control
+
+            OutDLP -->|7| Egress
+        end
+
         Logs[(Audit Log)]:::data
+
+        %% Invisible links to force the engine to place these side-by-side
+        Inbound ~~~ Logs
+        Logs ~~~ Outbound
+
+        %% Logging Links
+        AuthZ -.->|decision| Logs
+        InDLP -.->|scan result| Logs
+        OutDLP -.->|scan result| Logs
     end
 
-    %% ========= Agent Workloads =========
+    %% ========= Workloads (Bottom) =========
     subgraph Agents["Trusted: Agent Workloads"]
-        direction TB
+        direction LR
         A1[Agent A]:::workload
         A2[Agent B]:::workload
         A3[Agent C]:::workload
     end
 
-    %% ========= Request Flow =========
-    Slack -->|1| AuthN
-    Web -->|1| AuthN
-    CLI -->|1| AuthN
-    AuthN -->|2| AuthZ
-    AuthZ -->|3| InDLP
-    InDLP -->|4| Router
-    Router -->|5| A1
-    Router -->|5| A2
-    Router -->|5| A3
-
-    %% ========= Response Flow =========
-    A1 -->|6| OutDLP
-    A2 -->|6| OutDLP
-    A3 -->|6| OutDLP
-    OutDLP -->|7| Egress
-
-    %% ========= Logging =========
-    AuthZ -.->|decision| Logs
-    InDLP -.->|scan result| Logs
-    OutDLP -.->|scan result| Logs
+    %% ========= The "U-Shape" Pipeline Connections =========
+    Slack & Web & CLI -->|1| AuthN
+    Router -->|5| A1 & A2 & A3
+    A1 & A2 & A3 -->|6| OutDLP
 ```
 
 ## Security Artifacts
