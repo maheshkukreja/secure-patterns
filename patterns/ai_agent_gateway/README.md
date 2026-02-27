@@ -17,15 +17,14 @@ flowchart TB
     classDef data fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px,color:#000;
 
     %% ========= Untrusted Zone (Top) =========
-    subgraph Untrusted["Untrusted: Client Applications"]
-        direction LR
+    subgraph Untrusted["Untrusted Clients"]
         Slack[Slack Bot]:::untrusted
         Web[Web UI]:::untrusted
         CLI[Custom App / mTLS]:::untrusted
     end
 
     %% ========= Control Plane (Middle) =========
-    subgraph Gateway["Trusted: Agent Gateway (Control Plane)"]
+    subgraph Gateway["Agent Gateway (Control Plane)"]
         direction TB
 
         subgraph Inbound["Inbound Flow"]
@@ -48,9 +47,8 @@ flowchart TB
 
         Logs[(Audit Log)]:::data
 
-        %% Invisible links to force the engine to place these side-by-side
-        Inbound ~~~ Logs
-        Logs ~~~ Outbound
+        %% Force side-by-side layout
+        Inbound ~~~ Logs ~~~ Outbound
 
         %% Logging Links
         AuthZ -.->|decision| Logs
@@ -59,8 +57,7 @@ flowchart TB
     end
 
     %% ========= Workloads (Bottom) =========
-    subgraph Agents["Trusted: Agent Workloads"]
-        direction LR
+    subgraph Agents["Agent Workloads"]
         A1[Agent A]:::workload
         A2[Agent B]:::workload
         A3[Agent C]:::workload
