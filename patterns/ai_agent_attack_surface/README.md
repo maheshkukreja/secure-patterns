@@ -4,7 +4,7 @@ Agents don’t just generate text. They execute tools, persist memory, and make 
 
 This post breaks that attack surface into three primitives: tools, loops, and memory; and threat models each one.
 
-[**Read the full context on securepatterns.dev**](https://newsletter.securepatterns.dev/p/ai-agent-attack-surface-tools-loops-and-memory)
+[**Read the full context on securepatterns.dev**](https://newsletter.securepatterns.dev/p/the-ai-agent-attack-surface-tools-loops-and-memory)
 
 ## System Description
 
