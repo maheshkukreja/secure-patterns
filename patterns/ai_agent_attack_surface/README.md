@@ -1,6 +1,8 @@
-# AI Agent Attack Surface: Tools, Loops, and Memory
+# The AI Agent Attack Surface: Tools, Loops, and Memory
 
-Agents introduce three security boundaries that stateless LLM wrappers do not have: tool execution, autonomous loops, and persistent memory. This pattern covers the threat model for each primitive, how they chain together, and safe defaults for building agents you can reason about.
+Agents don’t just generate text. They execute tools, persist memory, and make decisions across multiple steps. Each of these capabilities introduces a new security boundary. When they combine, they create an attack surface that doesn’t exist in stateless LLM applications.
+
+This post breaks that attack surface into three primitives: tools, loops, and memory; and threat models each one.
 
 [**Read the full context on securepatterns.dev**](https://newsletter.securepatterns.dev/p/ai-agent-attack-surface-tools-loops-and-memory)
 
