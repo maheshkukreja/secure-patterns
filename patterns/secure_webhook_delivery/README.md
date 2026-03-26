@@ -2,7 +2,7 @@
 
 An architectural pattern for webhook delivery: HMAC signing, receiver-side verification, and SSRF prevention through egress proxies and DNS rebinding defenses. The sender signs every payload with a per-endpoint secret and delivers through a network-level egress proxy; the receiver verifies the signature and timestamp before processing.
 
-[**Read the full context on securepatterns.dev**](https://newsletter.securepatterns.dev/p/secure-webhook-delivery-signing-verification-ssrf-prevention)
+[**Read the full context on securepatterns.dev**](https://newsletter.securepatterns.dev/p/secure-webhook-delivery-signing-verification-and-ssrf-prevention)
 
 ## System Description
 
